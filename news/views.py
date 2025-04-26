@@ -6,7 +6,9 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from .models import News, Category, Subscription
 from .serializers import NewsSerializer, CategorySerializer, UserSerializer, SubscriptionSerializer
-from .permissions import IsAuthorOrReadOnly, HasAccessToContent
+from .permissions import IsAuthorOrReadOnly, HasAccessToContent, IsEditorOrAdminPermission
+from .tasks import send_notification_email
+from .tasks import send_real_email
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -51,8 +53,10 @@ class NewsViewSet(viewsets.ModelViewSet):
         """
         if self.action in ['retrieve', 'list']:
             permission_classes = [IsAuthenticated, HasAccessToContent]
+        elif self.action in ['create', 'update', 'partial_update', 'destroy', 'publish']:
+            permission_classes = [IsAuthenticated, IsEditorOrAdminPermission, IsAuthorOrReadOnly]
         else:
-            permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
+            permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
     
     def get_queryset(self):
@@ -61,6 +65,9 @@ class NewsViewSet(viewsets.ModelViewSet):
         - Admin: vê tudo
         - Editor: vê tudo (mas só pode editar as próprias)
         - Leitor comum: vê apenas as publicadas
+    
+        Filtra as notícias com base no tipo de usuário e sua assinatura.
+
         """
         user = self.request.user
         
@@ -72,8 +79,40 @@ class NewsViewSet(viewsets.ModelViewSet):
         if News.objects.filter(author=user).exists():
             return News.objects.filter(author=user) | News.objects.filter(status='published')
             
-        # Se for leitor comum, vê apenas as publicadas
-        return News.objects.filter(status='published')
+         # Leitor comum (INFO ou PRO)
+        queryset = News.objects.filter(status='published')
+
+        if not hasattr(user, 'subscription'):
+            # Se o usuário não tem assinatura, vê apenas notícias abertas
+            return queryset.filter(pro_only=False)
+        
+        subscription = user.subscription
+
+        if not subscription.is_pro:
+            # Se não é PRO, vê apenas notícias abertas
+            return queryset.filter(pro_only=False)
+        
+        # Se for PRO, filtrar de acordo com as verticais contratadas
+        ids_permitidos = []
+        for news in queryset:
+            category_name = news.category.name.lower()
+
+            if category_name in ['poder'] and subscription.has_poder:
+                ids_permitidos.append(news.id)
+            elif category_name in ['tributos'] and subscription.has_tributos:
+                ids_permitidos.append(news.id)
+            elif category_name in ['saude', 'saúde'] and subscription.has_saude:
+                ids_permitidos.append(news.id)
+            elif category_name in ['energia'] and subscription.has_energia:
+                ids_permitidos.append(news.id)
+            elif category_name in ['trabalhista'] and subscription.has_trabalhista:
+                ids_permitidos.append(news.id)
+
+            # Notícias abertas sempre permitidas
+            if not news.pro_only:
+                ids_permitidos.append(news.id)
+        
+        return News.objects.filter(id__in=ids_permitidos)
     
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsAuthorOrReadOnly])
     def publish(self, request, pk=None):
@@ -89,6 +128,16 @@ class NewsViewSet(viewsets.ModelViewSet):
         news.status = 'published'
         news.pub_date = timezone.now()
         news.save()
+
+        send_notification_email.delay(news.id, news.title)
+
+        # Exemplo de uso:
+        send_real_email.delay('vitor.monteiro@gmail.com', news.title)
+
+        send_real_email.apply_async(
+            args=['vitor.fariamonteiro@gmail.com', news.title],
+            countdown=60  # segundos
+        )
         
         serializer = self.get_serializer(news)
         return Response(serializer.data)

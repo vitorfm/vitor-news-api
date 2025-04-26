@@ -9,16 +9,37 @@ class IsAdminUser(permissions.BasePermission):
 
 class IsAuthorOrReadOnly(permissions.BasePermission):
     """
-    Permite que editores modifiquem apenas suas próprias notícias.
+        Permite que apenas o autor edite/exclua OU admins editem qualquer coisa.
     """
     def has_object_permission(self, request, view, obj):
         # Permissões de leitura são permitidas para qualquer solicitação
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        # Permissões de escrita apenas para o autor da notícia
+        # Admins têm permissão total
+        if request.user.is_staff:
+            return True
+
+        # Edição apenas para o autor
         return obj.author == request.user
 
+
+class IsEditorOrAdminPermission(permissions.BasePermission):
+    """
+    Permite acesso apenas para Admins ou usuários do grupo Editor.
+    """
+
+    def has_permission(self, request, view):
+        user = request.user
+
+        if not user.is_authenticated:
+            return False
+
+        if user.is_staff:
+            return True  # Admin tem acesso total
+
+        return user.groups.filter(name='Editor').exists()
+    
 class HasAccessToContent(permissions.BasePermission):
     """
     Verifica se o usuário tem acesso ao conteúdo com base em sua assinatura.
@@ -39,20 +60,24 @@ class HasAccessToContent(permissions.BasePermission):
             subscription = user.subscription
         except:
             return False
+
+        if not subscription.is_pro:
+            # Usuário não é PRO → não pode acessar conteúdo exclusivo
+            return False
             
-        # Verificar se usuário é PRO e tem acesso à vertical específica
-        if subscription.is_pro:
-            category_name = obj.category.name.lower()
-            
-            if category_name == 'poder' and subscription.has_poder:
-                return True
-            elif category_name == 'tributos' and subscription.has_tributos:
-                return True
-            elif category_name == 'saude' and subscription.has_saude:
-                return True
-            elif category_name == 'energia' and subscription.has_energia:
-                return True
-            elif category_name == 'trabalhista' and subscription.has_trabalhista:
-                return True
-                
+        # Se for PRO, verificar se tem acesso à vertical da notícia
+        category_name = obj.category.name.lower()
+
+       
+        if category_name in ['poder'] and subscription.has_poder:
+            return True
+        elif category_name in ['tributos'] and subscription.has_tributos:
+            return True
+        elif category_name in ['saude', 'saúde'] and subscription.has_saude:
+            return True
+        elif category_name in ['energia'] and subscription.has_energia:
+            return True
+        elif category_name in ['trabalhista'] and subscription.has_trabalhista:
+            return True
+
         return False
