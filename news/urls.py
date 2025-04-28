@@ -4,12 +4,12 @@ from .views import NewsViewSet, CategoryViewSet, UserViewSet, SubscriptionViewSe
 
 # Criar router e registrar nossos viewsets
 router = DefaultRouter()
-router.register(r'news', NewsViewSet)
-router.register(r'categories', CategoryViewSet)
-router.register(r'users', UserViewSet)
-router.register(r'subscriptions', SubscriptionViewSet)
+router.register(r"news", NewsViewSet)
+router.register(r"categories", CategoryViewSet)
+router.register(r"users", UserViewSet)
+router.register(r"subscriptions", SubscriptionViewSet)
 
 # URLs da API
 urlpatterns = [
-    path('', include(router.urls)),
+    path("", include(router.urls)),
 ]

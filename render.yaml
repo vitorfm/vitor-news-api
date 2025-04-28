@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: vitor-news-api
+    env: python
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+      python manage.py migrate
+    startCommand: gunicorn vitor_news.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        value: "s(bq6)=pahvq=wu31*044m6izwnqp!=%w39i5edsx3-=o!d%+c" # (já deve estar configurada no painel, mas se quiser pode manter aqui também)
+      - key: ALLOWED_HOSTS
+        value: "*"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nome-do-seu-banco-postgres
+          property: connectionString
+    autoDeploy: true

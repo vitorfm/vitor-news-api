@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('news', '0001_initial'),
+        ("news", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='news',
-            name='scheduled_pub_date',
-            field=models.DateTimeField(blank=True, help_text='Data agendada para publicação automática.', null=True),
+            model_name="news",
+            name="scheduled_pub_date",
+            field=models.DateTimeField(
+                blank=True,
+                help_text="Data agendada para publicação automática.",
+                null=True,
+            ),
         ),
     ]
