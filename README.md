@@ -17,6 +17,7 @@ API RESTful para gestão de notícias, com autenticação JWT, controle de acess
 9. Envio de e-mails de notificação (assíncrono via Celery)
 10. Agendamento de tarefas futuras
 11. Testes automatizados de funcionalidades críticas
+12. Celery Beat para agendar a publicação automática de notícias que possuem uma data e hora de agendamento
 
 🚀 Como Rodar o Projeto
 
@@ -99,6 +100,34 @@ Exemplo de corpo:
   3. Controle de acesso por perfil
   4. Restrições de leitura para leitores
 
+  
+  ---
+
+## 🔄 Publicação Automática de Notícias
+
+O sistema utiliza o **Celery Beat** para agendar a publicação automática de notícias que possuem uma data e hora de agendamento (`scheduled_pub_date`).
+
+- A cada 1 minuto, o Celery Beat dispara a execução da tarefa `publish_scheduled_news`.
+- A tarefa consulta todas as notícias que:
+  - Estão com o status `draft`
+  - Têm a `scheduled_pub_date` menor ou igual ao horário atual
+- As notícias encontradas são automaticamente publicadas.
+
+### Como funciona:
+
+- O **Celery Beat** é configurado para usar o banco de dados do Django como fonte de agendamento, via `django_celery_beat`.
+- O agendamento é gerenciado diretamente pelo Django Admin, na seção de "Periodic Tasks".
+
+# Terminal 1 - Django server
+python3 manage.py runserver
+
+# Terminal 2 - Celery Worker
+celery -A vitor_news worker --loglevel=info
+
+# Terminal 3 - Celery Beat
+celery -A vitor_news beat --loglevel=info
+
+  
   🗂️ Estrutura de Pastas
   vitor_news_api/
     news/

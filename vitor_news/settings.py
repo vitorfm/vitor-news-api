@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_yasg',  # Adicione esta linha
+    'django_celery_beat',
+    
+
     
     # Apps locais
     'news',
@@ -169,3 +172,6 @@ CELERY_TASK_SERIALIZER = 'json'
 # Configuração de e-mail para ambiente de desenvolvimento
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'noreply@vitornews.com'
+
+# Configurar Celery Beat para usar o banco de dados do Django
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
