@@ -1,6 +1,7 @@
 repos:
   - repo: https://github.com/psf/black
-    rev: 23.7.0  # ou a versão mais recente
+    rev: 24.3.0
     hooks:
       - id: black
-      
+        args: ["--safe"]
+        pass_filenames: false
