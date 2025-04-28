@@ -50,7 +50,7 @@ class NewsTests(APITestCase):
         self.assertEqual(News.objects.count(), 1)
         self.assertEqual(News.objects.get().title, "Notícia de Teste Automatizado")
 
-# Teste para publicar uma notícia
+    # Teste para publicar uma notícia
     def test_publish_news(self):
         # Gera o token JWT
         response = self.client.post('/api/token/', {

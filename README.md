@@ -119,10 +119,10 @@ O sistema utiliza o **Celery Beat** para agendar a publicação automática de n
 - O agendamento é gerenciado diretamente pelo Django Admin, na seção de "Periodic Tasks".
 
 # Terminal 1 - Django server
-python3 manage.py runserver
+`python3 manage.py runserver`
 
 # Terminal 2 - Celery Worker
-celery -A vitor_news worker --loglevel=info
+`celery -A vitor_news worker --loglevel=info`
 
 # Terminal 3 - Celery Beat
 celery -A vitor_news beat --loglevel=info

@@ -28,9 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -44,8 +42,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'drf_yasg',  # Adicione esta linha
     'django_celery_beat',
-    
-
     
     # Apps locais
     'news',
@@ -83,7 +79,6 @@ WSGI_APPLICATION = 'vitor_news.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -133,7 +128,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 # REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -158,7 +152,6 @@ SWAGGER_SETTINGS = {
         }
     },
 }
-
 
 # Media files
 MEDIA_URL = '/media/'
