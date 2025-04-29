@@ -47,17 +47,24 @@ INSTALLED_APPS = [
     "django_celery_beat",
     # Apps locais
     "news",
+    "corsheaders",
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True  # Para testes
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 ROOT_URLCONF = "vitor_news.urls"
 
@@ -77,7 +84,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "vitor_news.wsgi.application"
-
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -125,6 +131,10 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -151,6 +161,13 @@ SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {
         "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}
     },
+    # Usar CDN para arquivos estáticos do Swagger
+    "VALIDATOR_URL": None,
+    "REFETCH_SCHEMA_WITH_AUTH": True,
+    "REFETCH_SCHEMA_ON_LOGOUT": True,
+    # Usar CDNs externos para arquivos do Swagger UI
+    "SWAGGER_UI_DIST": "//unpkg.com/swagger-ui-dist@3.52.0",
+    "SWAGGER_UI_FAVICON_HREF": "//unpkg.com/swagger-ui-dist@3.52.0/favicon-32x32.png",
 }
 
 # Media files
