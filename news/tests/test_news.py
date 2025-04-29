@@ -1,6 +1,7 @@
 from rest_framework.test import APITestCase
 from django.contrib.auth.models import User, Group
 from news.models import Category, News
+from news.tasks import publish_scheduled_news  # ⬅️ importa a task para testar
 
 
 class NewsTests(APITestCase):
@@ -86,6 +87,7 @@ class NewsTests(APITestCase):
         self.assertEqual(news.status, "published")
         self.assertIsNotNone(news.pub_date)
 
+    # Teste leitor não pode criar uma notícia
     def test_reader_cannot_create_news(self):
         response = self.client.post(
             "/api/token/",
@@ -160,3 +162,90 @@ class NewsTests(APITestCase):
         self.assertIn("Notícia Aberta", titles)
         # - Leitor não deve ver a notícia exclusiva PRO
         self.assertNotIn("Notícia Exclusiva", titles)
+
+    # Criação de notícia agendada
+    def test_create_scheduled_news(self):
+        """Verifica se uma notícia agendada é criada com status 'draft' e data futura correta"""
+        self.authenticate_as_editor()  # usa helper já existente
+
+        future_time = timezone.now() + timedelta(minutes=5)
+        data = {
+            "title": "Notícia Agendada",
+            "subtitle": "Sub",
+            "content": "Conteúdo agendado",
+            "author_id": self.editor_user.id,
+            "category_id": self.category.id,
+            "status": "draft",
+            "scheduled_pub_date": future_time.isoformat(),
+            "pro_only": False,
+        }
+
+        response = self.client.post("/api/news/", data, format="json")
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(News.objects.count(), 1)
+        news = News.objects.first()
+        self.assertEqual(news.status, "draft")
+        self.assertEqual(
+            news.scheduled_pub_date.replace(microsecond=0),
+            future_time.replace(microsecond=0),
+        )
+
+    # Execução da task Celery que publica a notícia
+    def test_publish_scheduled_news_task(self):
+        """Verifica se a task 'publish_scheduled_news' publica corretamente uma notícia agendada"""
+        past_time = timezone.now() - timedelta(minutes=1)
+
+        News.objects.create(
+            title="Agendada para o passado",
+            subtitle="Sub",
+            content="Conteúdo...",
+            author=self.editor_user,
+            category=self.category,
+            status="draft",
+            scheduled_pub_date=past_time,
+        )
+
+        # Em vez de esperar o Celery rodar sozinho, chama a task diretamente como uma função
+        publish_scheduled_news()
+
+        news = News.objects.first()
+        self.assertEqual(news.status, "published")
+        self.assertIsNotNone(news.pub_date)
+
+    # Leitor PRO acessa notícia PRO da vertical permitida
+    def test_pro_reader_can_access_pro_news_in_allowed_vertical(self):
+        # Cria a notícia marcada como PRO
+        news = News.objects.create(
+            title="Notícia PRO",
+            subtitle="Subtítulo PRO",
+            content="Conteúdo exclusivo PRO.",
+            author=self.editor_user,
+            category=self.category,  # categoria "Poder"
+            status="published",
+            pro_only=True,
+        )
+
+        # Gera token para o leitor
+        response = self.client.post(
+            "/api/token/",
+            {"username": "leitor_test", "password": "senha123"},
+            format="json",
+        )
+        token = response.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
+
+        # Cria a assinatura do tipo PRO com acesso à categoria da notícia
+        from subscriptions.models import Subscription
+
+        Subscription.objects.create(
+            user=self.reader_user,
+            plan_type="PRO",
+        ).verticals.add(self.category)
+
+        # Requisição à API de listagem de notícias
+        response = self.client.get("/api/news/")
+        self.assertEqual(response.status_code, 200)
+
+        # Deve conter a notícia PRO no resultado
+        titles = [item["title"] for item in response.data]
+        self.assertIn("Notícia PRO", titles)
