@@ -1,5 +1,6 @@
 from rest_framework.test import APITestCase
 from django.contrib.auth.models import User, Group
+from django.utils import timezone
 from news.models import Category, News, Subscription
 from news.tasks import publish_scheduled_news  # ⬅️ importa a task para testar
 
