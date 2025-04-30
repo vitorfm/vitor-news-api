@@ -16,6 +16,14 @@ class NewsTests(APITestCase):
             username="leitor_test", password="senha123"
         )
 
+        # Faz login e pega o token
+        response = self.client.post(
+            "/api/token/", {"username": "editor_test", "password": "senha123"}
+        )
+
+        self.token = response.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
+
         # Cria grupos se não existirem
         editor_group, _ = Group.objects.get_or_create(name="Editor")
         leitor_group, _ = Group.objects.get_or_create(name="Leitor")
