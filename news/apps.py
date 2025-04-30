@@ -2,6 +2,9 @@ from django.apps import AppConfig
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
 from django.utils.text import slugify
+from news.models import News, Category
+from django.contrib.auth.models import User
+from django.utils.timezone import now
 
 
 class NewsConfig(AppConfig):
