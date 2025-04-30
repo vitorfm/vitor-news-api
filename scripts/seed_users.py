@@ -1,6 +1,8 @@
 import os
+import sys
 import django
 
+sys.path.append("/app")  # garante que o diretório do projeto está no path
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "vitor_news.settings")
 django.setup()
 
