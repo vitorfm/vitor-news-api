@@ -23,7 +23,7 @@ jobs:
           POSTGRES_USER: vitor
           POSTGRES_PASSWORD: vitor
           POSTGRES_DB: vitor_news
-
+          
         ports:
           - 5432:5432
         options: >-
@@ -33,7 +33,7 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: postgres://vitor:vitor@db:5432/vitor_news
+      DATABASE_URL: postgres://vitor:vitor@localhost:5432/vitornews
       SECRET_KEY: dummy-secret-key
       DEBUG: "False"
 
