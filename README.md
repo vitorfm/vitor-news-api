@@ -108,7 +108,7 @@ Agendamentos são controlados no Django Admin via **Periodic Tasks**.
 ## 🧪 Testes
 
 ```bash
-python3 manage.py test
+python3 manage.py test news.tests
 ```
 
 Cobertura:

@@ -5,7 +5,6 @@ FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-
 # Instala dependências de sistema
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -23,8 +22,6 @@ COPY requirements.txt /app/
 
 # Instala dependências Python
 RUN pip install --upgrade pip && pip install -r requirements.txt
-
-
 
 # Expõe porta padrão
 EXPOSE 8000

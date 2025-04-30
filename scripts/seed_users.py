@@ -2,11 +2,18 @@ import os
 import sys
 import django
 
-sys.path.append("/app")  # garante que o diretório do projeto está no path
+# Adiciona o diretório raiz do projeto ao path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "vitor_news.settings")
 django.setup()
 
 from django.contrib.auth.models import User, Group
+
+"""Reseta o banco de dados removendo todos os usuários e grupos"""
+print("Resetando usuarios do banco de dados...")
+User.objects.all().delete()
+Group.objects.all().delete()
+print("usuarios resetados com sucesso!")
 
 USERS = [
     {
@@ -50,6 +57,7 @@ for user_data in USERS:
             email=user_data["email"],
             password=user_data["password"],
         )
+        user.set_password(user_data["password"])  # <- força a senha correta
         user.is_superuser = user_data["is_superuser"]
         user.is_staff = user_data["is_staff"]
         user.save()
@@ -61,3 +69,6 @@ for user_data in USERS:
         print(f"Usuário {user.username} criado com sucesso.")
     else:
         print(f"Usuário {user_data['username']} já existe.")
+        user = User.objects.get(username=user_data["username"])
+        user.set_password(user_data["password"])  # <- força a senha correta
+        user.save()

@@ -31,6 +31,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["name"]
+    permission_classes = [IsEditorOrAdminPermission]
 
 
 class SubscriptionViewSet(viewsets.ModelViewSet):
