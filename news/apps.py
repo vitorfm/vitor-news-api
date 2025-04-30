@@ -1,10 +1,5 @@
 from django.apps import AppConfig
-from django.apps import AppConfig
 from django.db.models.signals import post_migrate
-from django.utils.text import slugify
-from news.models import News, Category
-from django.contrib.auth.models import User
-from django.utils.timezone import now
 
 
 class NewsConfig(AppConfig):
@@ -16,7 +11,10 @@ class NewsConfig(AppConfig):
 
 
 def create_initial_data(sender, **kwargs):
+    from django.utils.text import slugify
+    from news.models import News, Category
     from django.contrib.auth.models import User, Group
+    from django.utils.timezone import now
 
     if not User.objects.filter(username="admin").exists():
         admin = User.objects.create_superuser("admin", "admin@example.com", "admin123")
@@ -53,6 +51,7 @@ def create_initial_data(sender, **kwargs):
         "Trabalhista",
     ]
 
+    category_objs = {}
     for name in categories:
         slug = slugify(name)
         obj, created = Category.objects.get_or_create(
@@ -64,6 +63,7 @@ def create_initial_data(sender, **kwargs):
             print(f"ℹ️ Categoria já existia: {name} — slug atualizado")
         else:
             print(f"✅ Categoria criada: {name}")
+        category_objs[name] = obj
 
     # Notícias
     news_list = [
@@ -109,6 +109,7 @@ def create_initial_data(sender, **kwargs):
         },
     ]
 
+    admin = User.objects.get(username="admin")
     for item in news_list:
         category = category_objs[item["category"]]
         pub_date = now() if item["status"] == "published" else None
