@@ -94,7 +94,7 @@ WSGI_APPLICATION = "vitor_news.wsgi.application"
 if DEBUG:
     DATABASES = {
         "default": dj_database_url.config(
-            default="postgres://postgres:postgres@localhost:5432/vitor_news"
+            default="postgres://vitor:postgres@localhost:5432/vitor_news"
         )
     }
 else:
@@ -190,3 +190,13 @@ DEFAULT_FROM_EMAIL = "noreply@vitornews.com"
 
 # Configurar Celery Beat para usar o banco de dados do Django
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+if os.environ.get("RUN_SEED_ON_START") == "true":
+    from django.core.management import call_command
+
+    try:
+        call_command("runscript", "scripts/seed_categories.py")
+        call_command("runscript", "scripts/seed_news.py")
+        call_command("runscript", "scripts/seed_users.py")
+    except Exception as e:
+        print("Erro ao rodar seeds:", e)
