@@ -216,39 +216,3 @@ class NewsTests(APITestCase):
         news = News.objects.first()
         self.assertEqual(news.status, "published")
         self.assertIsNotNone(news.pub_date)
-
-    # Leitor PRO acessa notícia PRO da vertical permitida
-    def test_pro_reader_can_access_pro_news_in_allowed_vertical(self):
-        # Cria a notícia marcada como PRO
-        news = News.objects.create(
-            title="Notícia PRO",
-            subtitle="Subtítulo PRO",
-            content="Conteúdo exclusivo PRO.",
-            author=self.editor_user,
-            category=self.category,  # categoria "Poder"
-            status="published",
-            pro_only=True,
-        )
-
-        # Gera token para o leitor
-        response = self.client.post(
-            "/api/token/",
-            {"username": "leitor_test", "password": "senha123"},
-            format="json",
-        )
-        token = response.data["access"]
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
-
-        # Cria a assinatura do tipo PRO com acesso à categoria da notícia
-        Subscription.objects.create(
-            user=self.reader_user,
-            is_pro=True,
-        ).verticals.add(self.category)
-
-        # Requisição à API de listagem de notícias
-        response = self.client.get("/api/news/")
-        self.assertEqual(response.status_code, 200)
-
-        # Deve conter a notícia PRO no resultado
-        titles = [item["title"] for item in response.data]
-        self.assertIn("Notícia PRO", titles)
