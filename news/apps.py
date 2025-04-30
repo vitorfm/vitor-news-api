@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
+import os
 
 
 class NewsConfig(AppConfig):
@@ -15,6 +16,9 @@ def create_initial_data(sender, **kwargs):
     from news.models import News, Category
     from django.contrib.auth.models import User, Group
     from django.utils.timezone import now
+
+    if os.environ.get("DJANGO_LOAD_INITIAL_DATA") != "true":
+        return  # ⛔ não roda os seeds durante os testes
 
     if not User.objects.filter(username="admin").exists():
         admin = User.objects.create_superuser("admin", "admin@example.com", "admin123")
