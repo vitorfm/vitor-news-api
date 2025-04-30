@@ -28,6 +28,9 @@ Acesse em produção (Render):
 - Endpoint principal: [https://vitor-news-api.onrender.com/api/news/](https://vitor-news-api.onrender.com/api/news/)
 
 Usuário Admin: `admin` • Senha: `admin123`
+Usuário Editor: `editor` Senha: `editor123`
+Usuário Leitor INFO: `leitor_info` Senha: `info123`
+Usuário Leitor PRO: `leitor_pro` Senha: `pro123`
 
 ---
 
