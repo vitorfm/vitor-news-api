@@ -4,9 +4,6 @@ services:
     command: >
       sh -c "python manage.py migrate &&
              python manage.py collectstatic --noinput &&
-             python scripts/seed_users.py &&
-             python scripts/seed_categories.py &&
-             python scripts/seed_news.py &&
              gunicorn vitor_news.wsgi:application --bind 0.0.0.0:8000"
     volumes:
       - .:/app
