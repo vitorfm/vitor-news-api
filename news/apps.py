@@ -1,6 +1,7 @@
 from django.apps import AppConfig
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
+from django.utils.text import slugify
 
 
 class NewsConfig(AppConfig):
