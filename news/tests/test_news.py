@@ -1,6 +1,6 @@
 from rest_framework.test import APITestCase
 from django.contrib.auth.models import User, Group
-from news.models import Category, News
+from news.models import Category, News, Subscription
 from news.tasks import publish_scheduled_news  # ⬅️ importa a task para testar
 
 
@@ -26,6 +26,9 @@ class NewsTests(APITestCase):
 
         # Cria categoria
         self.category, _ = Category.objects.get_or_create(name="Poder", slug="poder")
+
+    def authenticate_as_editor(self):
+        self.client.login(username="editor", password="editor123")
 
     # Teste para criar uma notícia
     def test_create_news(self):
@@ -235,8 +238,6 @@ class NewsTests(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
 
         # Cria a assinatura do tipo PRO com acesso à categoria da notícia
-        from subscriptions.models import Subscription
-
         Subscription.objects.create(
             user=self.reader_user,
             plan_type="PRO",

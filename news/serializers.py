@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import News, Category, Subscription
+from django.utils import timezone
 
 
 class UserSerializer(serializers.ModelSerializer):
