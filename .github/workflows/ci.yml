@@ -33,7 +33,7 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: postgres://vitor:vitor@localhost:5432/vitornews
+      DATABASE_URL: postgres://vitor:vitor@localhost:5432/vitor_news
       SECRET_KEY: dummy-secret-key
       DEBUG: "False"
 
