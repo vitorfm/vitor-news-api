@@ -28,3 +28,9 @@ EXPOSE 8000
 
 # Comando para rodar o servidor
 CMD ["gunicorn", "vitor_news.wsgi:application", "--bind", "0.0.0.0:8000"]
+
+# Dá permissão de execução ao entrypoint
+RUN chmod +x /app/entrypoint.sh
+
+# Comando padrão
+CMD ["./entrypoint.sh"]

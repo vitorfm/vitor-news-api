@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -e  # encerra em caso de erro
 
 echo "🔄 Esperando o banco de dados iniciar..."
