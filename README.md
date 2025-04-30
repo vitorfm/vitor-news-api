@@ -54,6 +54,7 @@ Acesse em produção (Render):
 - Agendamento de tarefas com Celery Beat
 - Testes automatizados
 - CI com GitHub Actions
+- CD Render integrado com GitHub 
 
 ---
 
