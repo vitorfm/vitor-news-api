@@ -93,6 +93,7 @@ Corpo:
 ```
 
 Use o token no botão **Authorize** do Swagger para autenticar.
+No campo "value" coloque "Bearer "+"a chave access gerada para o usuário"    
 
 ---
 
